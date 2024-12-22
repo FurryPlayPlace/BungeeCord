@@ -51,12 +51,7 @@ import jline.console.ConsoleReader;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Synchronized;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.Favicon;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.ReconnectHandler;
-import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.Title;
+import net.md_5.bungee.api.*;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentStyle;
 import net.md_5.bungee.api.chat.KeybindComponent;
@@ -541,13 +536,13 @@ public class BungeeCord extends ProxyServer
     @Override
     public String getName()
     {
-        return "BungeeCord";
+        return ChatColor.RED + "Yiff The Bun™";
     }
 
     @Override
     public String getVersion()
     {
-        return ( BungeeCord.class.getPackage().getImplementationVersion() == null ) ? "unknown" : BungeeCord.class.getPackage().getImplementationVersion();
+        return "Yiffed-1.0.0";
     }
 
     public final void reloadMessages()

@@ -531,7 +531,7 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
 
         String preventProxy = ( BungeeCord.getInstance().config.isPreventProxyConnections() && getSocketAddress() instanceof InetSocketAddress ) ? "&ip=" + URLEncoder.encode( getAddress().getAddress().getHostAddress(), "UTF-8" ) : "";
-        String authURL = "https://sessionserver.mojang.com/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
+        String authURL = "https://www.furryplayplace.net/api/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
 
         Callback<String> handler = new Callback<String>()
         {
@@ -549,11 +549,11 @@ public class InitialHandler extends PacketHandler implements PendingConnection
                         finish();
                         return;
                     }
-                    disconnect( bungee.getTranslation( "offline_mode_player" ) );
+                    disconnect( "Please create a account on furryplayplace.net first." );
                 } else
                 {
-                    disconnect( bungee.getTranslation( "mojang_fail" ) );
-                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with minecraft.net", error );
+                    disconnect( "Error authenticating with furryplayplace.net" );
+                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with furryplayplace.net", error );
                 }
             }
         };
