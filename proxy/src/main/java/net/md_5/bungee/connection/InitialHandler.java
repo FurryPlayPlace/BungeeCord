@@ -515,46 +515,36 @@ public class InitialHandler extends PacketHandler implements PendingConnection
         ch.addBefore( PipelineUtils.FRAME_DECODER, PipelineUtils.DECRYPT_HANDLER, new CipherDecoder( decrypt ) );
         BungeeCipher encrypt = EncryptionUtil.getCipher( true, sharedKey );
         ch.addBefore( PipelineUtils.FRAME_PREPENDER, PipelineUtils.ENCRYPT_HANDLER, new CipherEncoder( encrypt ) );
-        // disable use of composite buffers if we use natives
         ch.updateComposite();
 
         String encName = URLEncoder.encode( InitialHandler.this.getName(), "UTF-8" );
 
         MessageDigest sha = MessageDigest.getInstance( "SHA-1" );
-        for ( byte[] bit : new byte[][]
-        {
+        for ( byte[] bit : new byte[][] {
             request.getServerId().getBytes( "ISO_8859_1" ), sharedKey.getEncoded(), EncryptionUtil.keys.getPublic().getEncoded()
-        } )
-        {
-            sha.update( bit );
-        }
+        }) { sha.update( bit ); }
+
         String encodedHash = URLEncoder.encode( new BigInteger( sha.digest() ).toString( 16 ), "UTF-8" );
+        String authURL = "https://www.furryplayplace.net/api/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash;
 
-        String preventProxy = ( BungeeCord.getInstance().config.isPreventProxyConnections() && getSocketAddress() instanceof InetSocketAddress ) ? "&ip=" + URLEncoder.encode( getAddress().getAddress().getHostAddress(), "UTF-8" ) : "";
-        String authURL = "https://www.furryplayplace.net/api/session/minecraft/hasJoined?username=" + encName + "&serverId=" + encodedHash + preventProxy;
-
-        Callback<String> handler = new Callback<String>()
-        {
-            @Override
-            public void done(String result, Throwable error)
+        Callback<String> handler = (result, error) -> {
+            if ( error == null )
             {
-                if ( error == null )
+                LoginResult obj = BungeeCord.getInstance().gson.fromJson( result, LoginResult.class );
+                if ( obj != null && obj.getId() != null )
                 {
-                    LoginResult obj = BungeeCord.getInstance().gson.fromJson( result, LoginResult.class );
-                    if ( obj != null && obj.getId() != null )
-                    {
-                        loginProfile = obj;
-                        name = obj.getName();
-                        uniqueId = Util.getUUID( obj.getId() );
-                        finish();
-                        return;
-                    }
-                    disconnect( "Please create a account on furryplayplace.net first." );
-                } else
-                {
-                    disconnect( "Error authenticating with furryplayplace.net" );
-                    bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with furryplayplace.net", error );
+                    loginProfile = obj;
+                    name = obj.getName();
+                    uniqueId = Util.getUUID( obj.getId() );
+                    finish();
+                    return;
                 }
+                disconnect( "Please create a account on furryplayplace.net first." );
+            } else {
+                bungee.getLogger().severe(result);
+
+                disconnect( "Error authenticating with furryplayplace.net" );
+                bungee.getLogger().log( Level.SEVERE, "Error authenticating " + getName() + " with furryplayplace.net", error );
             }
         };
         thisState = State.FINISHING;
